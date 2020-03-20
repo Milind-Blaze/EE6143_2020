@@ -2,7 +2,8 @@
 
 In this assignment, the RRC messages present in TS 38.331 are encoded using the ASN1C ASN.1 compiler. This work primarily involves obtaining the ASN1C compiler, parsing TS 38.331 and then compiling the resulting .asn file.
 
-- [Report]()
+- [Report](https://drive.google.com/file/d/1sZ57I_3me5Ksi9KHLSZWPt8D35-5KcHn/view?usp=sharing)
+- [Compiled C files (according to BER)](https://drive.google.com/drive/folders/1y4V7ST1Tlh2EI-ZFrJmK96roSrJd0JYz?usp=sharing)
 
 ## Contents
 
