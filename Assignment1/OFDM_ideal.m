@@ -63,13 +63,13 @@ for mod_index = 1:length(Ms)
         %% CP addition
         
         % CP addition for all symbols at once
-        transmit_signal_parallel = [time_domain_symbols(end - (cp_len -1):end, :); time_domain_symbols]
+        transmit_signal_parallel = [time_domain_symbols(end - (cp_len -1):end, :); time_domain_symbols];
 
         % converting from parallel to serial
-        transmit_signal = reshape(transmit_signal_parallel  , [],1);
+        transmit_signal = reshape(transmit_signal_parallel, [],1);
 
         % Add CP 
-        transmit_signal = [transmit_serial(end - (cp_len -1):end); transmit_serial];
+%         transmit_signal = [transmit_serial(end - (cp_len -1):end); transmit_serial];
 
 
         %% Channel
@@ -79,14 +79,15 @@ for mod_index = 1:length(Ms)
         received_signal = awgn(transmit_signal, SNR, "measured", 1234); % 1234 seed
 
         %% CP removal 
-
-        received_serial = received_signal(cp_len + 1: end);
+        
+        % Converting from serial to parallel
+        received_parallel = reshape(received_signal, N + cp_len, []);
+        
+        % CP removal for all symbols at once
+        received_parallel = received_parallel(cp_len + 1: end, :);
 
         %% FFT
-
-        % Converting from serial to parallel
-        received_parallel = reshape(received_serial, N, []);
-
+        
         % Obtaining FFT
         received_freq_domain = fft(received_parallel, N);
 
@@ -116,19 +117,30 @@ X = X';
 Y = Y';
 
 %% Plotting a waterfall curve
-semilogy(X, Y);
-title("Waterfall curves");
-xlabel("$\frac{E_b}{N_0}$", "Interpreter", "latex");
+figure('DefaultAxesFontSize',18)
+semilogy(X, Y, "o", 'LineWidth', 2);
+title("Waterfall curves")%, "FontSize", 22);
+xlabel("$10\log\left(\frac{E_b}{N_0}\right)$", "Interpreter", "latex");
 ylabel("BER");
 ylim([1e-6, 1e1])
+grid on
+% legend("M_{sim} = 4", "M_{sim} = 16", "M_{sim} = 64", "M_{sim} = 256")
 hold on
 %% Add theoretical curves
-m = 4
-x = X(:,1);
-x = x/10;
-x = 10.^x;
-y = qfunc(sqrt(3*log2(m)/(m-1)*x));
-y = 4*(1 - 1/sqrt(m))*y;    
-y = y;%- y.^2/4;
-semilogy(X(:,1), y, "ko")
-
+% TODO: vectorise this
+Y_theoretical = [];
+for i = 1:length(Ms)
+    m = Ms(i);
+    x = X(:,i);
+    x = x/10;
+    x = 10.^x;
+    y = qfunc(sqrt(3*log2(m)/(m-1)*x));
+    y = 4*(1 - 1/sqrt(m))*y;
+%     y = y - y.^2/4;
+    y = y/log2(m);
+    Y_theoretical = [Y_theoretical, y];
+end
+semilogy(X, Y_theoretical, "-", 'LineWidth',2)
+legend("M_{sim} = 4", "M_{sim} = 16", "M_{sim} = 64", "M_{sim} = 256",...
+    "M_{theory} = 4", "M_{theory} = 16", "M_{theory} = 64", "M_{theory} = 256",...
+    "NumColumns", 2)
