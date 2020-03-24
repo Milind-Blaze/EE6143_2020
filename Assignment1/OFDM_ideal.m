@@ -10,7 +10,7 @@ Author: Milind Kumar Vaddiraju
 %% Defining variables
 clc; clear;
 
-num_bits = 3*2^22            % Number of bits to be transmitted 
+num_bits = 3*2^20           % Number of bits to be transmitted 
 % more the number of bits, the smoother the curve at lower errors
 N = 2048                    % number of sub carriers
 cp_len = 120                % length of cyclic prefix
@@ -26,6 +26,7 @@ Ms = [4, 16, 64, 256];       % Modulation orders
 X = [];                      % X coordinates for the final plots
 Y = [] ;                     % Y coordinates for the final plots
 
+timing_offset = 5;          % timing offset to the left in the received data
 %% Simulation 
 
 % Generate bits
@@ -77,7 +78,16 @@ for mod_index = 1:length(Ms)
         E = 2/3*(M - 1);
         SNR = 10*log10(E/N0);
         received_signal = awgn(transmit_signal, SNR, "measured", 1234); % 1234 seed
-
+        
+        
+        %% Timing offset 
+        
+        % Offset is introduced by prepending timing_offset number of zeros
+        % to the signal and ignoring the last timing_offset number of
+        % values
+        
+        offset_signal = zeros(timing_offset, 1);
+        received_signal = [offset_signal; received_signal(1:end-timing_offset)];
         %% CP removal 
         
         % Converting from serial to parallel
@@ -85,11 +95,20 @@ for mod_index = 1:length(Ms)
         
         % CP removal for all symbols at once
         received_parallel = received_parallel(cp_len + 1: end, :);
+       
+        
 
         %% FFT
         
         % Obtaining FFT
         received_freq_domain = fft(received_parallel, N);
+        
+        %% Correction for timing offset
+        
+        indexArray = 1:N;
+        indexArray = indexArray' - 1;
+        correctionVector = exp(2*pi*1i*indexArray*timing_offset/N);
+        received_freq_domain = received_freq_domain.*correctionVector;
 
         %% Demodulation 
 
