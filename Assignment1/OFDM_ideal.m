@@ -22,9 +22,9 @@ N0_lb = -2.5                % lower bound on noise power
 N0s = logspace(N0_lb, N0_up, num_iter);     % list of noise powers
 
 
-Ms = [4, 16, 64, 256];      % Modulation orders
-X = []                      % X coordinates for the final plots
-Y = []                      % Y coordinates for the final plots
+Ms = [4, 16, 64, 256];       % Modulation orders
+X = [];                      % X coordinates for the final plots
+Y = [] ;                     % Y coordinates for the final plots
 
 %% Simulation 
 
@@ -74,7 +74,7 @@ for mod_index = 1:length(Ms)
 
         %% Channel
         
-        E = 2/3*(M - 1)
+        E = 2/3*(M - 1);
         SNR = 10*log10(E/N0);
         received_signal = awgn(transmit_signal, SNR, "measured", 1234); % 1234 seed
 
@@ -117,7 +117,7 @@ X = X';
 Y = Y';
 
 %% Plotting a waterfall curve
-figure('DefaultAxesFontSize',18)
+fig = figure('DefaultAxesFontSize',18)
 semilogy(X, Y, "o", 'LineWidth', 2);
 title("Waterfall curves")%, "FontSize", 22);
 xlabel("$10\log\left(\frac{E_b}{N_0}\right)$", "Interpreter", "latex");
