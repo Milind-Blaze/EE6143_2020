@@ -7,4 +7,6 @@ This repository contains work done as part of the course EE6143: Advanced Topics
 - __Assignment1__: simulation of transmission of OFDM symbols through a AWGN channel
 - __Assignment2__: a presentation explaining the procedures to be followed to acquire SIB1 and MIB as given in TS 38.331
 - __Assignment3__: an exercise in using the ASN.1 compiler to encode the RRC messages in TS 38.331
-
+- __Assignment4__: a presentation explaining the transmission of search space and coreset and the procedures after RACH
+- __Assignment5__: a programming exercise generating and providing the positions of the DMRS symbols
+ 

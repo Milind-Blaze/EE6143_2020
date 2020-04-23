@@ -9,6 +9,9 @@ Inputs
     c_init (int): initialization for the sequence x2 
 Outputs
     c (array): sequence of values for the sequence c
+
+Author: Milind Kumar V
+Date: April 2020
 %}
 function c = c_sequence(M_PN, c_init)
     

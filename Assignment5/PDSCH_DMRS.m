@@ -43,5 +43,13 @@ Date: April 2020
 
 %% Defining variables
 
-c_sequence(500, 23)
+N_symb_slot = 14;       % Number of symbols per slot
+scramblingID0 = 25;     % Givees N_ID^0, TS 38.331 DMRS-DownlinkConfig
+scramblingID1 = 25;     % Givees N_ID^1, TS 38.331 DMRS-DownlinkConfig
+DCIformat = "1-1";      % Can be 1-1, 1-0
+N_ID_cell = 25;
+dmrsType = "Type1";
+
+n_sf_mu 
+
 %% Relevant functions
