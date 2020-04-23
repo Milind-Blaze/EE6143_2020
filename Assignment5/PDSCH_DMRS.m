@@ -47,9 +47,13 @@ N_symb_slot = 14;       % Number of symbols per slot
 scramblingID0 = 25;     % Givees N_ID^0, TS 38.331 DMRS-DownlinkConfig
 scramblingID1 = 25;     % Givees N_ID^1, TS 38.331 DMRS-DownlinkConfig
 DCIformat = "1-1";      % Can be 1-1, 1-0
+n_sf_mu = 1; % slot number in the frame
 N_ID_cell = 25;
 dmrsType = "Type1";
+nSCID = 0; % TODO: fix this
 
-n_sf_mu 
+dmrsTypeAPosition = "pos2";
+
+
 
 %% Relevant functions

@@ -18,7 +18,9 @@ Outputs:
 %}
 
 function [lambda, deltaValue, wfValue, wtValue] = Table1(port, kdash, ldash)
-
+    
+    port = string(port); 
+    
     p = {'1000'; '1001'; '1002'; '1003'; '1004'; '1005'; '1006'; '1007'};
     CDM_group = [0, 0, 1, 1, 0, 0, 1, 1]';
     delta = [0, 0, 1, 1, 0, 0, 1, 1]';
