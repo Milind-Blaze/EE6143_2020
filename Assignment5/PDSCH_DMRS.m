@@ -15,6 +15,10 @@ clear; clc;
 %% Defining variables
 
 run("PDSCH_DMRS_config.m");
+% run("test_vector1.m");
+% run("test_vector2.m");
+% run("test_vector3.m");
+
 % Resource grid information
 maxRBNum = BWP_NumRBs + BWP_RBOffset; % operational frequence region
 n_sf_mu = PDSCH_AllocatedSlots; % slot number in the frame
@@ -128,7 +132,7 @@ elseif mappingType == "TypeB"
     % obtaining l
     for i = 1:length(lbar)
         for j = 1:length(ldash)
-            l = [l, lbar(i) + ldash(j)];
+            l = [l, lbar(i) + ldash(j)];    
         end
     end
 %     l = lbar + ldash;
@@ -243,11 +247,13 @@ end
 cSequence_limit = (BWP_RBOffset + BWP_NumRBs)*numSCperRB + 2;
 
 % Creating a time frequency grid for the sequence
-RG_DMRS = zeros(maxRBNum*numSCperRB, maxOFDMNum);
+multiport_RG_DMRS = [];
+multiport_RG_DMRS_output = [];
 kdash = [0,1];
 
 % Generating DMRS for the entire frequency domain
 for portValue = PortsSet
+    RG_DMRS = zeros(maxRBNum*numSCperRB, maxOFDMNum);
     for ldashValue = ldash
         for lbarValue = lbar
             lValue = ldashValue + lbarValue;
@@ -297,42 +303,41 @@ for portValue = PortsSet
             end
         end
     end
+    % Making sure only allocated region is used
+    RG_DMRS = RG_DMRS.*RG_freqAlloc_mask;
+    RG_DMRS_output = RG_DMRS(BWP_RBOffset*numSCperRB + 1:end,:);
+    
+    multiport_RG_DMRS = cat(3, multiport_RG_DMRS, RG_DMRS);
+    multiport_RG_DMRS_output = cat(3, multiport_RG_DMRS_output, RG_DMRS_output); 
 end
 
-% Making sure only allocated region is used
-RG_DMRS = RG_DMRS.*RG_freqAlloc_mask;
-RG_DMRS_output = RG_DMRS(BWP_RBOffset*numSCperRB + 1:end,:);
+
 
 %% Saving output as a .mat file
 
-save(outputFilename, "RG_DMRS_output");
+save(outputFilename, "multiport_RG_DMRS_output");
 
 %% Plotting the generated DMRS symbols
-
-figure
-colormap('jet');
-imagesc(abs(RG_DMRS_output));
-title("Resource grid (abs value of DMRS)")
-colorbar;
-set(gca,'XTick',[1:14])
-set(gca,'YDir','normal')
-xlabel("OFDM symbol (indexed from 1)");
-ylabel("Subcarrier (indexed from 1)");
+for i = 1:length(PortsSet)
+    figure
+    colormap('jet');
+    imagesc(abs(multiport_RG_DMRS_output(:,:,i)));
+    title("Resource grid (abs value of DMRS), Port " + string(PortsSet(i)) )
+    colorbar;
+    set(gca,'XTick',[1:14])
+    set(gca,'YDir','normal')
+    xlabel("OFDM symbol (indexed from 1)");
+    ylabel("Subcarrier (indexed from 1)");
+end
 
 %% Verifying accuracy
-
-filename = "only_dmrs_config3.mat";
-tfGrid = load(filename);
-loaded = tfGrid.output;
-
-dims = size(loaded);
-accuracy = sum(sum(loaded == RG_DMRS_output))/(dims(1)*dims(2))
-
-
-
-
-
-
-
+% filename = "only_dmrs_config1.mat";
+% filename = "only_dmrs_config2.mat";
+% filename = "only_dmrs_config3.mat";
+% tfGrid = load(filename);
+% loaded = tfGrid.output;
+% 
+% dims = size(loaded);
+% accuracy = sum(sum(loaded == multiport_RG_DMRS_output))/(dims(1)*dims(2))
 
 %% Relevant functions
