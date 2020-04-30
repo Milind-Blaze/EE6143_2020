@@ -47,7 +47,7 @@ clear; clc;
 %% Defining variables
 
 % Cell information
-N_ID_Cell = 20;         % Cell ID
+N_ID_Cell = 10;         % Cell ID
 nSCID = 0;              % Value of n_SCID
 mu = 1;                 % numerology
 
@@ -56,7 +56,7 @@ scramblingID0 = 25;     % Givees N_ID^0, TS 38.331 DMRS-DownlinkConfig
 scramblingID1 = 25;     % Givees N_ID^1, TS 38.331 DMRS-DownlinkConfig 
 dmrsType = "Type1";     % Configuration type
 cyclicPrefix = "Normal"; % Cyclic prefix type
-dmrs_AdditionalPosition = "pos0";
+dmrs_AdditionalPosition = "pos1";
 dmrs_TypeAPosition = "pos2";
 dmrs_PowerBoosting = 0;     % Used to determine beta
 maxLength = "len1"; % used to determine dmrs length
@@ -66,14 +66,14 @@ additionalDMRS_DL_Alt = "capable";
 
 
 % PDSCH information
-BWP_RBOffset =  0;      % Offset of BWP from zeroth subcarrier (number of RBs)
+BWP_RBOffset =  30;      % Offset of BWP from zeroth subcarrier (number of RBs)
 BWP_NumRBs = 256;        % size of BWP in RBs
-mappingType = "TypeA";   % PDSCH DMRS mapping type
-PDSCH_ResourceAllocationType = "Type1"; % Not sure what to do with this
+mappingType = "TypeB";   % PDSCH DMRS mapping type
+PDSCH_ResourceAllocationType = "Type0"; % Not sure what to do with this
 PDSCH_RBOffset = 0;           % Not sure what to do with this
 PDSCH_NumRBs = 50;
-PDSCH_StartOFDMSym = 2;    % PDSCH time domain start
-PDSCH_NumOFDMSyms = 12;     % PDSCH duration
+PDSCH_StartOFDMSym = 0;    % PDSCH time domain start
+PDSCH_NumOFDMSyms = 7;     % PDSCH duration
 PDSCH_DMRS_Length = 1;      % DMRS length
 rbg_Size = "config1";        % PDSCH-Config IE to find f-domain allocation, 38.214 5.1.2.2.1
 rbg_bitmap = [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0];
@@ -92,7 +92,8 @@ maxRBNum = BWP_NumRBs + BWP_RBOffset; % operational frequence region
 maxOFDMNum = 14; % deal with one slot
 numSCperRB = 12;
 
-
+% Output
+outputFilename = "DMRS_output.mat";
 
 
 
@@ -375,22 +376,31 @@ end
 RG_DMRS = RG_DMRS.*RG_freqAlloc_mask;
 RG_DMRS_output = RG_DMRS(BWP_RBOffset*numSCperRB + 1:end,:);
 
+%% Saving output as a .mat file
+
+save(outputFilename, "RG_DMRS_output");
+
+%% Plotting the generated DMRS symbols
+
 figure
 colormap('jet');
-% imagesc(abs(tfGrid.output));
-% imagesc(abs(repmat(maskVector', [1,14])));
 imagesc(abs(RG_DMRS_output));
-title("fire is awesome")
+title("Resource grid (abs value of DMRS)")
 colorbar;
 set(gca,'XTick',[1:14])
-            
-filename = "only_dmrs_config1.mat";
-tfGrid = load(filename);
-loaded = tfGrid.output;
+set(gca,'YDir','normal')
+xlabel("OFDM symbol (indexed from 1)");
+ylabel("Subcarrier (indexed from 1)");
 
-dims = size(loaded)
-accuracy = sum(sum(loaded == RG_DMRS_output))/(dims(1)*dims(2))
+%% Verifying accuracy
 
+% filename = "only_dmrs_config3.mat";
+% tfGrid = load(filename);
+% loaded = tfGrid.output;
+% 
+% dims = size(loaded);
+% accuracy = sum(sum(loaded == RG_DMRS_output))/(dims(1)*dims(2))
+% 
 
 
 
