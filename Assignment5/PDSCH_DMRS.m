@@ -9,91 +9,15 @@ Author: Milind Kumar V
 Date: April 2020
 %}
 
-%% YOU WILL NEED A PROOF OF CORRECTNESS
-
-%% Things  to implement
-%{
-
-- function to generate r(n) 7.4.
-- function to generate c(n) 5.2.1
-- function to generate c_init 7.4
-- function to generate beta_DMRS_PDSCH
-- function to generate w_t
-- function to generate  w_f
-- function to generate k
-
-
-- parameter N_symb_slot
-- parameter n_sf_mu (slot number within a frame)
-- parameter l (OFDM symbol number)
-- parameter N_ID_nSCID (how to select?)
-- parameter scramblingID0
-- parameter scramblingID1
-- parameter N_ID_cell
-- parameter DCI_format
-- parameter n_SCID
-- parameter dmrs_type (configuration type 1 or 2)
-- parameter k-reference
-- parameter PDSCH mapping type (type A or B)
-- parameter l0 
-- parameter dmrs-TypeA-Position
-
-
-%}
+%%
 clear; clc;
-
-
 
 %% Defining variables
 
-% Cell information
-N_ID_Cell = 10;         % Cell ID
-nSCID = 0;              % Value of n_SCID
-mu = 1;                 % numerology
-
-% DMRS information
-scramblingID0 = 25;     % Givees N_ID^0, TS 38.331 DMRS-DownlinkConfig
-scramblingID1 = 25;     % Givees N_ID^1, TS 38.331 DMRS-DownlinkConfig 
-dmrsType = "Type1";     % Configuration type
-cyclicPrefix = "Normal"; % Cyclic prefix type
-dmrs_AdditionalPosition = "pos1";
-dmrs_TypeAPosition = "pos2";
-dmrs_PowerBoosting = 0;     % Used to determine beta
-maxLength = "len1"; % used to determine dmrs length
-DCI_dmrs_len = "double";    % When the max length argument is len2
-lte_CRS_ToMatchAround = "not configured"; % either "configured" or "not configured", case for l1
-additionalDMRS_DL_Alt = "capable";
-
-
-% PDSCH information
-BWP_RBOffset =  30;      % Offset of BWP from zeroth subcarrier (number of RBs)
-BWP_NumRBs = 256;        % size of BWP in RBs
-mappingType = "TypeB";   % PDSCH DMRS mapping type
-PDSCH_ResourceAllocationType = "Type0"; % Not sure what to do with this
-PDSCH_RBOffset = 0;           % Not sure what to do with this
-PDSCH_NumRBs = 50;
-PDSCH_StartOFDMSym = 0;    % PDSCH time domain start
-PDSCH_NumOFDMSyms = 7;     % PDSCH duration
-PDSCH_DMRS_Length = 1;      % DMRS length
-rbg_Size = "config1";        % PDSCH-Config IE to find f-domain allocation, 38.214 5.1.2.2.1
-rbg_bitmap = [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0];
- 
-
-N_symb_slot = 14;       % Number of symbols per slot
-DCIformat = "1_1";      % Can be 1-1, 1-0
-n_sf_mu = 0; % slot number in the frame
-RNTI_used = "C-RNTI";  % RNTI used to scramble 
-
-PortsSet = 1000;
-PortsNum = 1;
-
+run("PDSCH_DMRS_config.m");
 % Resource grid information
 maxRBNum = BWP_NumRBs + BWP_RBOffset; % operational frequence region
-maxOFDMNum = 14; % deal with one slot
-numSCperRB = 12;
-
-% Output
-outputFilename = "DMRS_output.mat";
+n_sf_mu = PDSCH_AllocatedSlots; % slot number in the frame
 
 
 
@@ -102,7 +26,10 @@ outputFilename = "DMRS_output.mat";
 
 %% Determining beta
 
-beta_PDSCH_DMRS = 10^(dmrs_PowerBoosting/10);
+% Refer TS 38.214 Section 4.1
+beta_DMRS = PDSCH_PowerBoosting - dmrs_PowerBoosting; % in dB
+% beta_PDSCH_DMRS = 10^(dmrs_PowerBoosting/10);
+beta_PDSCH_DMRS = 10^((-1*beta_DMRS)/20);
 
 %% Determining l
 l = [];
@@ -394,13 +321,13 @@ ylabel("Subcarrier (indexed from 1)");
 
 %% Verifying accuracy
 
-% filename = "only_dmrs_config3.mat";
-% tfGrid = load(filename);
-% loaded = tfGrid.output;
-% 
-% dims = size(loaded);
-% accuracy = sum(sum(loaded == RG_DMRS_output))/(dims(1)*dims(2))
-% 
+filename = "only_dmrs_config3.mat";
+tfGrid = load(filename);
+loaded = tfGrid.output;
+
+dims = size(loaded);
+accuracy = sum(sum(loaded == RG_DMRS_output))/(dims(1)*dims(2))
+
 
 
 
