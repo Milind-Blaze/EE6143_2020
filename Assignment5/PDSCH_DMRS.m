@@ -14,8 +14,8 @@ clear; clc;
 
 %% Defining variables
 
-run("PDSCH_DMRS_config.m");
-% run("test_vector1.m");
+% run("PDSCH_DMRS_config.m");
+run("test_vector1.m");
 % run("test_vector2.m");
 % run("test_vector3.m");
 

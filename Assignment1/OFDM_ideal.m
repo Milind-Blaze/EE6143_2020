@@ -26,7 +26,9 @@ Ms = [4, 16, 64, 256];       % Modulation orders
 X = [];                      % X coordinates for the final plots
 Y = [] ;                     % Y coordinates for the final plots
 
-timing_offset = 5;          % timing offset to the left in the received data
+timing_offset = 0;          % timing offset to the left in the received data
+
+
 %% Simulation 
 
 % Generate bits
@@ -163,3 +165,5 @@ semilogy(X, Y_theoretical, "-", 'LineWidth',2)
 legend("M_{sim} = 4", "M_{sim} = 16", "M_{sim} = 64", "M_{sim} = 256",...
     "M_{theory} = 4", "M_{theory} = 16", "M_{theory} = 64", "M_{theory} = 256",...
     "NumColumns", 2)
+
+
