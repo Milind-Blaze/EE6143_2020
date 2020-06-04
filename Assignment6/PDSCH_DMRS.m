@@ -10,7 +10,7 @@ is used to estimate the channel. The ideal and real
 channel are compared. In short, this serves as the 
 Transmit and channel portion of the DMRS-receiver and 
 transmitter chain.
-
+    
 Author: Milind Kumar V
 Date: May 2020
 %}
@@ -348,6 +348,7 @@ end
 %% Adding random data to the remaining subcarriers
 
 dmrsLoc = find(multiport_RG_DMRS_output ~= 0);
+dmrsSyms = multiport_RG_DMRS_output(dmrsLoc);
 
 % Creating a new variable to save DMRS data 
 freqData = multiport_RG_DMRS_output;
@@ -433,8 +434,15 @@ elseif channelType == "TDL"
     [channelOutput, channelEstimatePerfect] = TDLChannelTX(timeDataSerial,...
         velocity, carrierFreq, delaySpread, SamplingRate, MIMOCorrelation,...
         delayProfile, NumReceiveAntennas, PortsNum, BWP_NumRBs, mu, n_sf_mu);
-    
 end    
+
+%% Timing offset estimation
+
+timingOffset = nrTimingEstimate(channelOutput, BWP_NumRBs, 30, n_sf_mu, dmrsLoc,dmrsSyms);
+disp("Estimated timing offset: " + string(timingOffset));
+channelOutput = channelOutput(timingOffset + 1:end, :);
+
+
 
 %% Noise
 RXinput = channelOutput;
@@ -476,7 +484,13 @@ end
 
 %% Channel estimation
 
+% Practical channel estimation
+channelEstimatePractical = nrChannelEstimate(RXfreqData, dmrsLoc, dmrsSyms);
 
+% a = abs(channelEstimatePerfect(:,:, 2));
+% b = abs(channelEstimatePractical(:,:,2));
+% plotResourceGrid(a(1:1200,:),"t1", "x", "y");
+% plotResourceGrid(b(1:1200,:),"t2", "x", "y");
 
 %% Saving DMRS output as a .mat file
 

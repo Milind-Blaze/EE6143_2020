@@ -56,15 +56,23 @@ function [channelOutput, perfectChannel] = TDLChannelTX(inputSignal, v, fc,...
     tdl.NumReceiveAntennas = num_rx_ant;
     
     tdlinfo = info(tdl);
-    maxChDelay = ceil(max(tdlinfo.PathDelays*SR)) + tdlinfo.ChannelFilterDelay
-    disp(tdlinfo.PathDelays*SR)
-    disp(tdlinfo.ChannelFilterDelay)
+    
+    %% Estimating the channel delay
+    maxChDelay = ceil(max(tdlinfo.PathDelays*SR)) + tdlinfo.ChannelFilterDelay;
+%     disp(tdlinfo.PathDelays*SR)
+%     disp(tdlinfo.ChannelFilterDelay)
+
     %% Transmission through the channel
-    
-    [channelOutput, pathGains, sampleTimes] = tdl(inputSignal);
-    
+    [channelOutput, pathGains, sampleTimes] = tdl([inputSignal; zeros(maxChDelay, num_tx_ant)]);
+%     size(inputSignal)
+%     size(channelOutput)
+
     %% Estimating the channel 
     pathFilters = getPathFilters(tdl);
+    
+    perfectTimingOffset = nrPerfectTimingEstimate(pathGains,pathFilters);
+    disp("perfectTimingOffset: " + string(perfectTimingOffset));
+    
     perfectChannel = nrPerfectChannelEstimate(pathGains, pathFilters, numRB,...
         scs, numSlot);
 
