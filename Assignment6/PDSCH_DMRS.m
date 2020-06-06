@@ -516,7 +516,12 @@ for i = 1:NumReceiveAntennas
     end
 end
 
+%%
+a = estimate(:,:,1,6)./(channelEstimatePractical(:,:,1,6) + eps);
+plotResourceGrid(abs(a),"whatever","x","y");
 %% Interpolation of channel
+
+
 %% Saving DMRS output as a .mat file
 
 save(outputFilename, "multiport_RG_DMRS_output");
