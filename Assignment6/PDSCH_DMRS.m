@@ -364,7 +364,7 @@ modulatedSymbols = qammod(dataBits, QAMorder, "gray", "InputType", "bit",...
             "UnitAveragePower", true);
 
 % filling the resource grid with data
-freqData(dataLoc) = modulatedSymbols;
+freqData(dataLoc) = 0;%modulatedSymbols;
 
 % plotting the resource grid
 % for i = 1:length(PortsSet)
@@ -516,8 +516,7 @@ for i = 1:NumReceiveAntennas
     end
 end
 
-% plotResourceGrid(abs(channelEstimate./(estimate + eps)), "ratio", "x", "y")
-
+%% Interpolation of channel
 %% Saving DMRS output as a .mat file
 
 save(outputFilename, "multiport_RG_DMRS_output");

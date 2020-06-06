@@ -17,7 +17,7 @@ RNTI_used = "C-RNTI";   % RNTI used to scramble
 
 scramblingID0 = 25;                 % Givees N_ID^0, TS 38.331 DMRS-DownlinkConfig, belongs to {1,2...65535}
 scramblingID1 = 25;                 % Givees N_ID^1, TS 38.331 DMRS-DownlinkConfig, belongs to {1,2...65535} 
-dmrsType = "Type1";                 % Configuration type, determines frequency spacing, either "Type1" or "Type2"
+dmrsType = "Type2";                 % Configuration type, determines frequency spacing, either "Type1" or "Type2"
 cyclicPrefix = "Normal";            % Cyclic prefix type, "Normal" or "Extended"
 dmrs_AdditionalPosition = "pos1";   % corresponds to dmrs-AdditionalPosition from Tables 7.4.1.1.2-3/4 TS 38.211, can be "pos{0/1/2/3}"
 dmrs_TypeAPosition = "pos2";        % corresponds to dmrs-TypeAPosition from, IE from MIB TS 38.331, either "pos2" or "pos3" 
@@ -40,8 +40,8 @@ PDSCH_NumOFDMSyms = 7;                  % PDSCH duration
 PDSCH_DMRS_Length = 1;                  % DMRS length, redundant parameter 
 rbg_Size = "config1";                   % PDSCH-Config IE to find f-domain allocation, 38.214 5.1.2.2.1, determines P
 rbg_bitmap = [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]; % Bitmap for ResourceAllocationType = "Type0", default allocation suggested by test vector provider
-PortsSet = [1000, 1002];                        % Ports to be used
-PortsNum = 2;                           % Number of ports to be used
+PortsSet = [1000,1001,1002,1003,1004,1005];                        % Ports to be used
+PortsNum = length(PortsSet);            % Number of ports to be used
 PDSCH_PowerBoosting = 0;                % Absolute power allocated to PDSCH in dB, used to find beta_DMRS_PDSCH
 PDSCH_AllocatedSlots = 0;               % determines n_sf_mu value, takes in only a single slot value
 
