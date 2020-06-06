@@ -1,4 +1,4 @@
-%{
+    %{
 Script to configure the parameters for the generation of PDSCH DMRS
 
 Author: Milind Kumar V
@@ -40,8 +40,8 @@ PDSCH_NumOFDMSyms = 7;                  % PDSCH duration
 PDSCH_DMRS_Length = 1;                  % DMRS length, redundant parameter 
 rbg_Size = "config1";                   % PDSCH-Config IE to find f-domain allocation, 38.214 5.1.2.2.1, determines P
 rbg_bitmap = [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]; % Bitmap for ResourceAllocationType = "Type0", default allocation suggested by test vector provider
-PortsSet = [1000];                        % Ports to be used
-PortsNum = 1;                           % Number of ports to be used
+PortsSet = [1000, 1002];                        % Ports to be used
+PortsNum = 2;                           % Number of ports to be used
 PDSCH_PowerBoosting = 0;                % Absolute power allocated to PDSCH in dB, used to find beta_DMRS_PDSCH
 PDSCH_AllocatedSlots = 0;               % determines n_sf_mu value, takes in only a single slot value
 
@@ -77,7 +77,7 @@ cSpeed = physconst('lightspeed');   % speed of light
 delaySpread = 30e-9;                % Delay spread of channel in s
 MIMOCorrelation = 'Low';            % Correlation between UE and BS antennas
 delayProfile = 'TDL-C';             % Different channel models from the spec TR 38.901, options are TDL-A/B/C/D/E
-NumReceiveAntennas = 2;             % number of receive antennas, must be set equal to PortsNum if channelType is "AWGN"
+NumReceiveAntennas = 1;             % number of receive antennas, must be set equal to PortsNum if channelType is "AWGN"
 
 
 

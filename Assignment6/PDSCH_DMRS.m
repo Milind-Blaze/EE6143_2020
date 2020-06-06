@@ -16,7 +16,7 @@ Date: May 2020
 %}
 
 %%
-clear; clc;
+clear; clc; close all;
 
 %% Defining variables
 
@@ -323,17 +323,17 @@ end
 
 
 %% Plotting the generated DMRS symbols
-for i = 1:length(PortsSet)
-    figure
-    colormap('jet');
-    imagesc(abs(multiport_RG_DMRS_output(:,:,i)));
-    title("Resource grid (abs value of DMRS), Port " + string(PortsSet(i)) )
-    colorbar;
-    set(gca,'XTick',[1:14])
-    set(gca,'YDir','normal')
-    xlabel("OFDM symbol (indexed from 1)");
-    ylabel("Subcarrier (indexed from 1)");
-end
+% for i = 1:length(PortsSet)
+%     figure
+%     colormap('jet');
+%     imagesc(abs(multiport_RG_DMRS_output(:,:,i)));
+%     title("Resource grid (abs value of DMRS), Port " + string(PortsSet(i)) )
+%     colorbar;
+%     set(gca,'XTick',[1:14])
+%     set(gca,'YDir','normal')
+%     xlabel("OFDM symbol (indexed from 1)");
+%     ylabel("Subcarrier (indexed from 1)");
+% end
 
 %% Verifying accuracy
 % filename = "only_dmrs_config1.mat";
@@ -353,6 +353,7 @@ dmrsSyms = multiport_RG_DMRS_output(dmrsLoc);
 % Creating a new variable to save DMRS data 
 freqData = multiport_RG_DMRS_output;
 
+%% Data filling: TODO: ADD MORE COMPLICATED METHOD TO ANALYSE THE EFFECT OF DATA
 
 % finding and filling the locations where DMRS data is not present
 dataLoc = find(freqData == 0);
@@ -366,13 +367,13 @@ modulatedSymbols = qammod(dataBits, QAMorder, "gray", "InputType", "bit",...
 freqData(dataLoc) = modulatedSymbols;
 
 % plotting the resource grid
-for i = 1:length(PortsSet)
-    titleValue = 'Resource grid with data, Port '+ string(PortsSet(i)); 
-    plotResourceGrid(abs(freqData(:,:,i)),...
-        titleValue,...
-        'OFDM symbol (indexed from 1)',...
-        'Subcarrier (indexed from 1)');
-end
+% for i = 1:length(PortsSet)
+%     titleValue = 'Resource grid with data, Port '+ string(PortsSet(i)); 
+%     plotResourceGrid(abs(freqData(:,:,i)),...
+%         titleValue,...
+%         'OFDM symbol (indexed from 1)',...
+%         'Subcarrier (indexed from 1)');
+% end
 
 %% Mapping subcarriers to frequency axis for IFFT
 
@@ -387,10 +388,10 @@ newIndexSet = mod(orgIndexSet - maxRENum/2, FFTsize) + 1;
 FFTgrid(newIndexSet,:, :) = freqData;
 
 % plotting FFT grid for visualization
-for i = 1:PortsNum
-    plotResourceGrid(abs(FFTgrid(:,:,i)), "FFTgrid", 'OFDM symbol (indexed from 1)',...
-        'Subcarrier (indexed from 1)');
-end
+% for i = 1:PortsNum
+%     plotResourceGrid(abs(FFTgrid(:,:,i)), "FFTgrid", 'OFDM symbol (indexed from 1)',...
+%         'Subcarrier (indexed from 1)');
+% end
 
 
 
@@ -467,7 +468,6 @@ end
 % Scaling performed again because IFFT was also scaled
 RXFFTgrid = 1/normalizingFactor*fft(RXtimeDataParallel, FFTsize, 1);
 
-
 %% Mapping FFT grid to RB grid
 % This is necessary to undo the mapping done before hand and to rearrange 
 % [d,e,f,0,0,a,b,c] to [0,a,b,c,d,e,f,0]. This occurs only along the 1st
@@ -475,26 +475,53 @@ RXFFTgrid = 1/normalizingFactor*fft(RXtimeDataParallel, FFTsize, 1);
 
 RXfreqData = RXFFTgrid(newIndexSet, :, :);
 
-for i = 1:NumReceiveAntennas
-    titleValue = "RX Resource grid, RX antenna " + string(i);
-    plotResourceGrid(abs(RXfreqData(:,:,i)), titleValue,... 
-    'OFDM symbol (indexed from 1)','Subcarrier (indexed from 1)');
-end
+% Plotting the RX resource grid
+% for i = 1:NumReceiveAntennas
+%     titleValue = "RX Resource grid, RX antenna " + string(i);
+%     plotResourceGrid(abs(RXfreqData(:,:,i)), titleValue,... 
+%     'OFDM symbol (indexed from 1)','Subcarrier (indexed from 1)');
+% end
 
 
 %% Channel estimation
 
 % Practical channel estimation
 channelEstimatePractical = nrChannelEstimate(RXfreqData, dmrsLoc, dmrsSyms);
+% TODO: Clean this up
+% a = abs(channelEstimatePerfect(:,:, 1));
+% plotResourceGrid(a,"t1", "x", "y");
+% b = abs(channelEstimatePractical(:,:,1));
+% plotResourceGrid(b(:,:,1,1),"t2", "x", "y");
 
-% a = abs(channelEstimatePerfect(:,:, 2));
-% b = abs(channelEstimatePractical(:,:,2));
-% plotResourceGrid(a(1:1200,:),"t1", "x", "y");
-% plotResourceGrid(b(1:1200,:),"t2", "x", "y");
+for i = 1:NumReceiveAntennas
+    for j = 1:PortsNum
+        titleValue = "H_{" + string(i) + string(j) + "}, nrChannelEstimate";
+        plotResourceGrid(abs(channelEstimatePractical(:,:,i,j)), titleValue, "OFDM symbol",...
+            "Subcarrier");
+    end
+end
+
+
+%% Using the channel estimation function
+
+estimate = estimateChannel(multiport_RG_DMRS_output, RXfreqData, PortsSet,...
+    dmrsType);
+
+% plotting for the obtained channel 
+for i = 1:NumReceiveAntennas
+    for j = 1:PortsNum
+        titleValue = "H_{" + string(i) + string(j) + "}";
+        plotResourceGrid(abs(estimate(:,:,i,j)), titleValue, "OFDM symbol",...
+            "Subcarrier");
+    end
+end
+
+% plotResourceGrid(abs(channelEstimate./(estimate + eps)), "ratio", "x", "y")
 
 %% Saving DMRS output as a .mat file
 
 save(outputFilename, "multiport_RG_DMRS_output");
+
 
 %% Relevant functions
 

@@ -2,10 +2,12 @@
 Function to generate values from Table 7.4.1.1.2-2 from TS 38.211 section
 7.4
 
-[lambda, deltaValue, wfValue, wtValue] = Table2(p, kdash, ldash)
+Used if DMRS configuration type is "Type2"
+
+[lambda, deltaValue, wfValue, wtValue] = Table2(port, kdash, ldash)
 
 Inputs:
-    p (character array/ string): port number
+    port (character array/ string): port number
     kdash (binary): value of the variable k', TS 38.211 7.4
     ldash (binary): value of the variable l', TS 38.211 7.4
 Outputs: 
