@@ -22,7 +22,7 @@ cyclicPrefix = "Normal";            % Cyclic prefix type, "Normal" or "Extended"
 dmrs_AdditionalPosition = "pos1";   % corresponds to dmrs-AdditionalPosition from Tables 7.4.1.1.2-3/4 TS 38.211, can be "pos{0/1/2/3}"
 dmrs_TypeAPosition = "pos2";        % corresponds to dmrs-TypeAPosition from, IE from MIB TS 38.331, either "pos2" or "pos3" 
 dmrs_PowerBoosting = 0;             % Power allocation in dB (absolute) for DMRS Used to determine beta
-maxLength = "len2";                 % used to determine dmrs length, i.e single symbol or double symbol DMRS, options are "not configured", "len1", "len2"
+maxLength = "len1";                 % used to determine dmrs length, i.e single symbol or double symbol DMRS, options are "not configured", "len1", "len2"
 DCI_dmrs_len = "double";            % if maxLength = "len2", then DCI_dmrs_len determines single/double symbol DMRS; either "single" or "double"
 lte_CRS_ToMatchAround = "not configured"; % either "configured" or "not configured", parameter used to determine l1
 additionalDMRS_DL_Alt = "capable";  % either "capable" or "not capable", parameter to determine l1
@@ -40,7 +40,7 @@ PDSCH_NumOFDMSyms = 7;                  % PDSCH duration
 PDSCH_DMRS_Length = 1;                  % DMRS length, redundant parameter 
 rbg_Size = "config1";                   % PDSCH-Config IE to find f-domain allocation, 38.214 5.1.2.2.1, determines P
 rbg_bitmap = [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]; % Bitmap for ResourceAllocationType = "Type0", default allocation suggested by test vector provider
-PortsSet = [1000,1001,1004,1005,1002,1003,1006,1007];                        % Ports to be used
+PortsSet = [1000];                        % Ports to be used
 PortsNum = length(PortsSet);            % Number of ports to be used
 PDSCH_PowerBoosting = 0;                % Absolute power allocated to PDSCH in dB, used to find beta_DMRS_PDSCH
 PDSCH_AllocatedSlots = 0;               % determines n_sf_mu value, takes in only a single slot value

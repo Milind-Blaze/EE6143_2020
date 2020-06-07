@@ -507,21 +507,85 @@ end
 estimate = estimateChannel(multiport_RG_DMRS_output, RXfreqData, PortsSet,...
     dmrsType);
 
-% plotting for the obtained channel 
+%% plotting for the obtained channel 
+% for i = 1:NumReceiveAntennas
+%     for j = 1:PortsNum
+%         titleValue = "H_{" + string(i) + string(j) + "}";
+%         plotResourceGrid(abs(estimate(:,:,i,j)), titleValue, "OFDM symbol",...
+%             "Subcarrier");
+%     end
+% end
+
+%%
+% a = estimate(:,:,1,6)./(channelEstimatePractical(:,:,1,6) + eps);
+% plotResourceGrid(abs(a),"whatever","x","y");
+%% Interpolation of channel
+
+channelEstimate = zeros(size(estimate));
+
+% TODO: Deal with the OBOE in the subcarriers- channelEstimate doesn't deal
+% well with the last subcarrier
+
 for i = 1:NumReceiveAntennas
     for j = 1:PortsNum
-        titleValue = "H_{" + string(i) + string(j) + "}";
-        plotResourceGrid(abs(estimate(:,:,i,j)), titleValue, "OFDM symbol",...
+        % find which symbols have DMRS signals in them
+        TXDMRSport = multiport_RG_DMRS_output(:,:,j);
+        DMRSpos = find(abs(TXDMRSport) ~= 0);
+        DMRSmask = zeros(size(TXDMRSport));
+        DMRSmask(DMRSpos) = 1;
+        DMRSsymbolMask = sum(DMRSmask, 1);
+        DMRSsymbolPos = find(DMRSsymbolMask ~= 0);
+        
+        % All symbols have DMRS in the same frequency position 
+        DMRScarriers = find(DMRSmask(:,DMRSsymbolPos(1)) ~= 0);
+        
+        % Creating a grid for interpolation
+        gridVec = {DMRScarriers, DMRSsymbolPos};
+        V = estimate(DMRScarriers, DMRSsymbolPos,i,j);
+        F = griddedInterpolant(gridVec, V);
+        
+        % Creating a grid for queries
+        xq = 1:maxOFDMNum;
+        yq = 1:DMRScarriers(end);
+        gridVecq = {yq, xq};
+        Vq = F(gridVecq);
+        channelEstimate(yq,xq,i,j) = Vq;
+    end
+end
+
+%% plotting for the interpolated channel 
+
+for i = 1:NumReceiveAntennas
+    for j = 1:PortsNum
+        titleValue = "H_{" + string(i) + string(j) + "}, interpolated";
+        plotResourceGrid(abs(channelEstimate(:,:,i,j)), titleValue, "OFDM symbol",...
             "Subcarrier");
     end
 end
 
-%%
-a = estimate(:,:,1,6)./(channelEstimatePractical(:,:,1,6) + eps);
-plotResourceGrid(abs(a),"whatever","x","y");
-%% Interpolation of channel
+%% Computing a plot of the error
+
+yq = 1:(DMRScarriers(end) - 1);
+[X,Y] = meshgrid(xq,yq);
+errorMatrix = abs(channelEstimate - channelEstimatePractical);
+errorMatrix = errorMatrix.^2;
+errorMatrix = sum(errorMatrix, [3, 4]);
+errorMatrix = sqrt(errorMatrix);
+
+normalizeMatrix = abs(channelEstimatePractical);
+normalizeMatrix = normalizeMatrix.^2;
+normalizeMatrix = sum(normalizeMatrix, [3, 4]);
+normalizeMatrix = sqrt(normalizeMatrix);
 
 
+ratio = errorMatrix(yq,:)./normalizeMatrix(yq,:);
+
+figure
+surf(X,Y,ratio);
+
+% TODO: make this a clean plot
+
+        
 %% Saving DMRS output as a .mat file
 
 save(outputFilename, "multiport_RG_DMRS_output");
@@ -529,30 +593,7 @@ save(outputFilename, "multiport_RG_DMRS_output");
 
 %% Relevant functions
 
-%{ 
-Function to plot the generated resource grid
 
-plotResourceGrid(data, titleValue, xlabelValue, ylabelValue)
-
-Inputs:
-    data (2D array): data/RG for which heatmap needs to be generated
-    titleValue (string): title of the plot
-    xlabelValue (string): X axis label of the figure
-    ylabelValue (string): Y axis label of the figure
-%}
-
-function plotResourceGrid(data, titleValue, xlabelValue, ylabelValue)
-    figure
-    imagesc(data);
-    colormap('jet');
-    title(titleValue)
-    colorbar;
-    set(gca,'XTick',[1:14])
-    set(gca,'YDir','normal')
-    xlabel(xlabelValue);
-    ylabel(ylabelValue);
-    
-end
 
 %% Relevant sources
 %{
