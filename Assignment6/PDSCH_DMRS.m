@@ -399,13 +399,13 @@ end
 
 % plotting the resource grid
 
-for i = 1:length(PortsSet)
-    titleValue = 'Resource grid with data, Port '+ string(PortsSet(i)); 
-    plotResourceGrid(abs(freqData(:,:,i)),...
-        titleValue,...
-        'OFDM symbol (indexed from 1)',...
-        'Subcarrier (indexed from 1)');
-end
+% for i = 1:length(PortsSet)
+%     titleValue = 'Resource grid with data, Port '+ string(PortsSet(i)); 
+%     plotResourceGrid(abs(freqData(:,:,i)),...
+%         titleValue,...
+%         'OFDM symbol (indexed from 1)',...
+%         'Subcarrier (indexed from 1)');
+% end
 
 %% Mapping subcarriers to frequency axis for IFFT
 
@@ -467,7 +467,7 @@ elseif channelType == "TDL"
     [tdlChannelOutput, channelEstimatePerfect] = TDLChannelTX(timeDataSerial,...
         velocity, carrierFreq, delaySpread, SamplingRate, MIMOCorrelation,...
         delayProfile, NumReceiveAntennas, PortsNum, BWP_NumRBs, mu, n_sf_mu);
-    channelOutput = awgn(tdlChannelOutput, SNR, "measured", 1234);
+    channelOutput = awgn(tdlChannelOutput, SNR, "measured");
 end    
 
 %% Timing offset estimation
@@ -526,6 +526,8 @@ channelEstimatePractical = nrChannelEstimate(RXfreqData, dmrsLoc, dmrsSyms);
 % b = abs(channelEstimatePractical(:,:,1));
 % plotResourceGrid(b(:,:,1,1),"t2", "x", "y");
 
+%% Plot the practical channel
+
 for i = 1:NumReceiveAntennas
     for j = 1:PortsNum
         titleValue = "H_{" + string(i) + string(j) + "}, ideal from nrChannelEstimate";
@@ -569,20 +571,35 @@ for i = 1:NumReceiveAntennas
         DMRSsymbolMask = sum(DMRSmask, 1);
         DMRSsymbolPos = find(DMRSsymbolMask ~= 0);
         
-        % All symbols have DMRS in the same frequency position 
-        DMRScarriers = find(DMRSmask(:,DMRSsymbolPos(1)) ~= 0);
-        
-        % Creating a grid for interpolation
-        gridVec = {DMRScarriers, DMRSsymbolPos};
-        V = estimate(DMRScarriers, DMRSsymbolPos,i,j);
-        F = griddedInterpolant(gridVec, V);
-        
-        % Creating a grid for queries
-        xq = 1:maxOFDMNum;
-        yq = 1:DMRScarriers(end);
-        gridVecq = {yq, xq};
-        Vq = F(gridVecq);
-        channelEstimate(yq,xq,i,j) = Vq;
+        if length(DMRSsymbolPos) > 1
+            % All symbols have DMRS in the same frequency position 
+            DMRScarriers = find(DMRSmask(:,DMRSsymbolPos(1)) ~= 0);
+
+            % Creating a grid for interpolation
+            gridVec = {DMRScarriers, DMRSsymbolPos};
+            V = estimate(DMRScarriers, DMRSsymbolPos,i,j);
+            F = griddedInterpolant(gridVec, V);
+
+            % Creating a grid for queries
+            xq = 1:maxOFDMNum;
+            yq = 1:DMRScarriers(end);
+            gridVecq = {yq, xq};
+            Vq = F(gridVecq);
+            channelEstimate(yq,xq,i,j) = Vq;
+            
+        elseif length(DMRSsymbolPos) == 1
+            DMRScarriers = find(DMRSmask(:, DMRSsymbolPos(1)) ~= 0);
+            
+            V = estimate(DMRScarriers, DMRSsymbolPos, i, j);
+            F = griddedInterpolant(DMRScarriers, V);
+            
+            xq = 1:maxOFDMNum;
+            yq = 1:DMRScarriers(end);
+            Vq = F(yq);
+            
+            % No interpolation, assume channel is constant with time
+            channelEstimate(yq,:,i,j) = repmat(Vq',1,maxOFDMNum);
+        end
     end
 end
 
@@ -617,7 +634,7 @@ ratio = errorMatrix(yq,:)./normalizeMatrix(yq,:);
 
 figure
 surf(X,Y,ratio);
-titleValue = "Mean squared error over RG, SNR = " + string(SNR);
+titleValue = "Mean squared error over RG, SNR = " + string(SNR) + "dB";
 xlabel("OFDM symbols");
 ylabel("Subcarriers allocated to PDSCH");
 title(titleValue);
