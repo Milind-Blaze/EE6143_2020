@@ -17,12 +17,12 @@ RNTI_used = "C-RNTI";   % RNTI used to scramble
 
 scramblingID0 = 25;                 % Givees N_ID^0, TS 38.331 DMRS-DownlinkConfig, belongs to {1,2...65535}
 scramblingID1 = 25;                 % Givees N_ID^1, TS 38.331 DMRS-DownlinkConfig, belongs to {1,2...65535} 
-dmrsType = "Type2";                 % Configuration type, determines frequency spacing, either "Type1" or "Type2"
+dmrsType = "Type1";                 % Configuration type, determines frequency spacing, either "Type1" or "Type2"
 cyclicPrefix = "Normal";            % Cyclic prefix type, "Normal" or "Extended"
 dmrs_AdditionalPosition = "pos1";   % corresponds to dmrs-AdditionalPosition from Tables 7.4.1.1.2-3/4 TS 38.211, can be "pos{0/1/2/3}"
 dmrs_TypeAPosition = "pos2";        % corresponds to dmrs-TypeAPosition from, IE from MIB TS 38.331, either "pos2" or "pos3" 
 dmrs_PowerBoosting = 0;             % Power allocation in dB (absolute) for DMRS Used to determine beta
-maxLength = "len2";                 % used to determine dmrs length, i.e single symbol or double symbol DMRS, options are "not configured", "len1", "len2"
+maxLength = "len1";                 % used to determine dmrs length, i.e single symbol or double symbol DMRS, options are "not configured", "len1", "len2"
 DCI_dmrs_len = "double";            % if maxLength = "len2", then DCI_dmrs_len determines single/double symbol DMRS; either "single" or "double"
 lte_CRS_ToMatchAround = "not configured"; % either "configured" or "not configured", parameter used to determine l1
 additionalDMRS_DL_Alt = "capable";  % either "capable" or "not capable", parameter to determine l1

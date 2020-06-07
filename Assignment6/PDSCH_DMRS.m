@@ -484,7 +484,7 @@ channelOutput = channelOutput(timingOffset + 1:end, :);
 
 
 
-%% Noise
+%% 
 RXinput = channelOutput;
 
 %% CP strip and serial to parallel
@@ -651,12 +651,12 @@ title(titleValue);
         
 %% Saving DMRS output as a .mat file
 
-save(outputFilename, "multiport_RG_DMRS_output");
+save(outputFilename,...
+    "multiport_RG_DMRS_output",...
+    "channelEstimate");
 
 
 %% Relevant functions
-
-
 
 %% Relevant sources
 %{
