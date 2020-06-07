@@ -30,7 +30,8 @@ maxRBNum = BWP_NumRBs + BWP_RBOffset; % operational frequence region
 maxRENum = BWP_NumRBs*numSCperRB;
 n_sf_mu = PDSCH_AllocatedSlots; % slot number in the frame
 
-
+disp("SNR = " + string(SNR) + "dB");
+disp("fillingType = " + fillingType);
 
 %% Mapping to Physical resources 
 
@@ -355,25 +356,56 @@ freqData = multiport_RG_DMRS_output;
 
 %% Data filling: TODO: ADD MORE COMPLICATED METHOD TO ANALYSE THE EFFECT OF DATA
 
-% finding and filling the locations where DMRS data is not present
-dataLoc = find(freqData == 0);
-numSymbols = length(dataLoc);
-numBits = numSymbols*log2(QAMorder);
-dataBits = randi([0,1], numBits,1);
-modulatedSymbols = qammod(dataBits, QAMorder, "gray", "InputType", "bit",...
-            "UnitAveragePower", true);
 
-% filling the resource grid with data
-freqData(dataLoc) = 0;%modulatedSymbols;
+if fillingType == "Zero"
+    % Only DMRS is transmitted
+    dataLoc = find(freqData == 0);
+    freqData(dataLoc) = 0;
+    
+elseif fillingType == "All"
+    % QAM symbols are filled in every vacant RG position
+    dataLoc = find(freqData == 0);
+    numSymbols = length(dataLoc);
+    numBits = numSymbols*log2(QAMorder);
+    dataBits = randi([0,1], numBits,1);
+    modulatedSymbols = qammod(dataBits, QAMorder, "gray", "InputType", "bit",...
+                "UnitAveragePower", true);
+    freqData(dataLoc) = modulatedSymbols;
+            
+elseif fillingType == "Isolated"
+    % Fills QAM symbols such that data symbols transmitted from the port of
+    % one CDM group do not interfere with the DMRS of a port from another
+    % CDM group
+    numSymbols = size(freqData,1)*size(freqData,2)*size(freqData,3);
+    numBits = numSymbols*log2(QAMorder);
+    dataBits = randi([0,1], numBits,1);
+    modulatedSymbols = qammod(dataBits, QAMorder, "gray", "InputType", "bit",...
+                "UnitAveragePower", true);
+    dataGrid = reshape(modulatedSymbols, size(freqData));
+    for i = 1:PortsNum
+        freqDataPort = freqData(:,:,i);
+        dmrsLocPort = find(freqDataPort ~= 0);
+        dmrsPortMask = ones(size(freqDataPort));
+        dmrsPortMask(dmrsLocPort) = 0;
+        for j = 1:PortsNum
+            dataGrid(:,:,j) = dataGrid(:,:,j).*dmrsPortMask;
+        end
+    end
+    freqData = freqData + dataGrid;
+end
+
+
+%% Plotting resource grid with data
 
 % plotting the resource grid
-% for i = 1:length(PortsSet)
-%     titleValue = 'Resource grid with data, Port '+ string(PortsSet(i)); 
-%     plotResourceGrid(abs(freqData(:,:,i)),...
-%         titleValue,...
-%         'OFDM symbol (indexed from 1)',...
-%         'Subcarrier (indexed from 1)');
-% end
+
+for i = 1:length(PortsSet)
+    titleValue = 'Resource grid with data, Port '+ string(PortsSet(i)); 
+    plotResourceGrid(abs(freqData(:,:,i)),...
+        titleValue,...
+        'OFDM symbol (indexed from 1)',...
+        'Subcarrier (indexed from 1)');
+end
 
 %% Mapping subcarriers to frequency axis for IFFT
 
@@ -425,16 +457,17 @@ timeDataSerial = squeeze(timeDataSerial);
 
 %% Channel 
 if channelType == "AWGN"
-    channelOutput = timeDataSerial;
+    channelOutput = awgn(timeDataSerial, SNR, "measured", 1234);
 elseif channelType == "TDL"
     % defining a channel
     
     % TODO: FIGURE OUT HOW MANY SUBCARRIERS NEED TO GO TO PERFECT
     % ESTIMATION
     % TODO: WHAT DOES THE INITIAL SLOT NUMBER DO?
-    [channelOutput, channelEstimatePerfect] = TDLChannelTX(timeDataSerial,...
+    [tdlChannelOutput, channelEstimatePerfect] = TDLChannelTX(timeDataSerial,...
         velocity, carrierFreq, delaySpread, SamplingRate, MIMOCorrelation,...
         delayProfile, NumReceiveAntennas, PortsNum, BWP_NumRBs, mu, n_sf_mu);
+    channelOutput = awgn(tdlChannelOutput, SNR, "measured", 1234);
 end    
 
 %% Timing offset estimation
@@ -495,7 +528,7 @@ channelEstimatePractical = nrChannelEstimate(RXfreqData, dmrsLoc, dmrsSyms);
 
 for i = 1:NumReceiveAntennas
     for j = 1:PortsNum
-        titleValue = "H_{" + string(i) + string(j) + "}, nrChannelEstimate";
+        titleValue = "H_{" + string(i) + string(j) + "}, ideal from nrChannelEstimate";
         plotResourceGrid(abs(channelEstimatePractical(:,:,i,j)), titleValue, "OFDM symbol",...
             "Subcarrier");
     end
@@ -580,8 +613,15 @@ normalizeMatrix = sqrt(normalizeMatrix);
 
 ratio = errorMatrix(yq,:)./normalizeMatrix(yq,:);
 
+%% Plotting the MMSE error over the resource grid
+
 figure
 surf(X,Y,ratio);
+titleValue = "Mean squared error over RG, SNR = " + string(SNR);
+xlabel("OFDM symbols");
+ylabel("Subcarriers allocated to PDSCH");
+title(titleValue);
+
 
 % TODO: make this a clean plot
 

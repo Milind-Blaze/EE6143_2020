@@ -40,7 +40,7 @@ PDSCH_NumOFDMSyms = 7;                  % PDSCH duration
 PDSCH_DMRS_Length = 1;                  % DMRS length, redundant parameter 
 rbg_Size = "config1";                   % PDSCH-Config IE to find f-domain allocation, 38.214 5.1.2.2.1, determines P
 rbg_bitmap = [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]; % Bitmap for ResourceAllocationType = "Type0", default allocation suggested by test vector provider
-PortsSet = [1000];                        % Ports to be used
+PortsSet = [1000, 1002];                        % Ports to be used
 PortsNum = length(PortsSet);            % Number of ports to be used
 PDSCH_PowerBoosting = 0;                % Absolute power allocated to PDSCH in dB, used to find beta_DMRS_PDSCH
 PDSCH_AllocatedSlots = 0;               % determines n_sf_mu value, takes in only a single slot value
@@ -52,8 +52,9 @@ DCIformat = "1_1";          % Can be "1-1", "1-0"
 maxOFDMNum = 14;            % number of OFDM symbols in the frequency grid to be generated
 numSCperRB = 12;            % number of subcarriers per Resource Block
 
-%% Time domain information
+%% Time domain and data information
 
+fillingType = "Isolated";        % determines how data is filled into the RG, options are "Zero", "All", "Isolated"
 SamplingRate = 122.88e6;    % symbol/sample rate for time domain data
 CPLen1 = 352;               % length of the cyclic prefix for the first OFDM symbol
 CPLenn = 288;               % length of the cyclic prefix for the OFDM symbols 2-14
@@ -61,15 +62,11 @@ FFTsize = 4096;             % size of the FFT being used
 QAMorder = 64;              % the value of M in M-QAM, modulation used for data
 QAMencoding = 'gray';% QAM encoding type
 
-%{
-noise power
-snr
-signal power
 
-%}
 
 %% Channel information
 
+SNR = 20;                            % SNR for the AWGN in dB
 channelType = "TDL";                % either AWGN ('AWGN') or TDL/multipath ('TDL') channel
 velocity = 5;                       % velocity in km/h
 carrierFreq = 3.5e9;                % carrier frequency in hz
