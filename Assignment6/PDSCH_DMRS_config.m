@@ -74,7 +74,7 @@ cSpeed = physconst('lightspeed');   % speed of light
 delaySpread = 30e-9;                % Delay spread of channel in s
 MIMOCorrelation = 'Low';            % Correlation between UE and BS antennas
 delayProfile = 'TDL-C';             % Different channel models from the spec TR 38.901, options are TDL-A/B/C/D/E
-NumReceiveAntennas = 2;             % number of receive antennas, must be set equal to PortsNum if channelType is "AWGN"
+NumReceiveAntennas = 1;             % number of receive antennas, must be set equal to PortsNum if channelType is "AWGN"
 
 
 

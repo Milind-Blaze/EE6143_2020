@@ -472,8 +472,14 @@ end
 
 %% Timing offset estimation
 
-timingOffset = nrTimingEstimate(channelOutput, BWP_NumRBs, 30, n_sf_mu, dmrsLoc,dmrsSyms);
-disp("Estimated timing offset: " + string(timingOffset));
+
+if channelType == "AWGN"
+    timingOffset = 0;
+elseif channelType == "TDL"
+    timingOffset = nrTimingEstimate(channelOutput, BWP_NumRBs, 30, n_sf_mu, dmrsLoc,dmrsSyms);
+    disp("Estimated timing offset: " + string(timingOffset));
+end
+
 channelOutput = channelOutput(timingOffset + 1:end, :);
 
 
