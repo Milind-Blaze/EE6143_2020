@@ -66,7 +66,7 @@ QAMencoding = 'gray';% QAM encoding type
 
 %% Channel information
 
-SNR = 35;                            % SNR for the AWGN in dB
+SNR = 35;                           % SNR for the AWGN in dB
 channelType = "TDL";                % either AWGN ('AWGN') or TDL/multipath ('TDL') channel
 velocity = 5;                       % velocity in km/h
 carrierFreq = 3.5e9;                % carrier frequency in hz
