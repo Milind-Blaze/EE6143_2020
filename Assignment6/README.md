@@ -1,4 +1,4 @@
-- # Assignment6
+# Assignment6
 
   This folder contains all the code written to generate PDSCH DMRS signals according to TS 38.211 using MATLAB.  Further, a receiver is designed for the detection of the transmitted DMRS symbols and channel estimation in the case of a AWGN and TDL channel defined according to TR 38.901.
 
