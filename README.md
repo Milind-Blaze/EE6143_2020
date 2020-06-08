@@ -9,4 +9,5 @@ This repository contains work done as part of the course EE6143: Advanced Topics
 - __Assignment3__: an exercise in using the ASN.1 compiler to encode the RRC messages in TS 38.331
 - __Assignment4__: a presentation explaining the transmission of search space and coreset and the procedures after RACH
 - __Assignment5__: a programming exercise generating and providing the positions of the DMRS symbols
+- __Assignment6__: a programming exercise to generate DMRS symbols (and data), transmit through a TDL channel and estimate the channel coefficients from the received data
  
